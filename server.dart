@@ -4,7 +4,7 @@ import 'dart:convert';
 void main(List<String> args) {
   HttpServer.bind('localhost', 6969).then(
     (server) {
-      print('server set up as listening');
+      print('server set up as listening: ${server.port}');
       server.listen(
         (request) {
           WebSocketTransformer.upgrade(request).then(

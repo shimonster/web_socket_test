@@ -5,12 +5,15 @@ import 'dart:async';
 
 void main(List<String> args) {
   print('client started');
-  const address = 'ws://localhost:16969';
+  print(args);
+  final address = 'ws://localhost:16969/${args[0]}';
   WebSocket.connect(address).then(
     (ws) {
       print('client connected to ws');
+      print(ws.readyState);
       if (ws.readyState == WebSocket.open) {
         mainIsolate(ws).then((value) {
+          print('after threads');
           ws.listen(
             (event) {
               print(

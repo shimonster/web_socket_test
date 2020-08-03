@@ -6,13 +6,13 @@ import 'dart:async';
 void main(List<String> args) {
   print('client started');
   print(args);
-  final address = 'ws://localhost:16969/${args[0]}';
+  final address = 'ws://localhost:42069/${args[0]}';
   WebSocket.connect(address).then(
     (ws) {
       print('client connected to ws');
       print(ws.readyState);
       if (ws.readyState == WebSocket.open) {
-        mainIsolate(ws).then((value) {
+        mainIsolate(ws, args[0]).then((value) {
           print('after threads');
           ws.listen(
             (event) {
@@ -31,17 +31,19 @@ void main(List<String> args) {
   );
 }
 
-Future<void> inputIsolate(SendPort mainSendPort) async {
+Future<void> inputIsolate(Map<String, dynamic> message) async {
   while (true) {
     final input = stdin.readLineSync();
-    mainSendPort.send(json.encode({'client message': input}));
+    message['sp'].send(
+        json.encode({DateTime.now().toString(): input, 'uid': message['uid']}));
   }
 }
 
-Future<void> mainIsolate(WebSocket ws) async {
+Future<void> mainIsolate(WebSocket ws, String uid) async {
   final mainRecievePort = ReceivePort();
 
-  await Isolate.spawn(inputIsolate, mainRecievePort.sendPort);
+  await Isolate.spawn(
+      inputIsolate, {'sp': mainRecievePort.sendPort, 'uid': uid});
 
   mainRecievePort.listen((message) {
     ws.add(message);
